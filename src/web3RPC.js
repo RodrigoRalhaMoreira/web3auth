@@ -7,6 +7,7 @@ export default class RPC {
 
   async getChainId() {
     try {
+      console.log(this.provider)
       const web3 = new Web3(this.provider);
 
       // Get the connected Chain's ID
@@ -510,6 +511,39 @@ export default class RPC {
       });
 
       return privateKey;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  async receiveFunds() {
+    try {
+      const web3 = new Web3(this.provider);
+      const address = (await web3.eth.getAccounts())[0];
+      // hardcoded abi
+      var tokenContract = new web3.eth.Contract(
+        [{"inputs":[],"stateMutability":"payable","type":"constructor"},{"inputs":[],"name":"amountToSend","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"reward","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"sendFunds","outputs":[],"stateMutability":"nonpayable","type":"function"}],
+        process.env.REACT_APP_CONTRACT_ADDRESS
+      );
+      const response = await tokenContract.methods.sendFunds().send({from: address, gas: 100000})
+      .then(function(receipt){
+        console.log(receipt.transactionHash);
+        web3.eth.getTransactionReceipt(receipt.transactionHash, function(error, result) {
+          if (error) {
+            console.error("Error in retrieving transaction receipt: ", error);
+          } else {
+            console.log("Transaction receipt: ", result);
+          }
+        });
+      })
+      .catch(function(error) {
+        console.error("Error in sendFunds: ", error);
+      });
+      // Get user's balance in ether
+      const balance = web3.utils.fromWei(
+        await web3.eth.getBalance(address) // Balance is in wei
+      );
+      return balance
     } catch (error) {
       return error;
     }

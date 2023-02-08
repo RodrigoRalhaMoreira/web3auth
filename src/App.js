@@ -5,6 +5,8 @@ import { CHAIN_NAMESPACES } from "@web3auth/base";
 import RPC from "./web3RPC";
 import "./App.css";
 
+const Web3 = require('web3')
+
 const clientId =
   "BMkKHE4n2KgzLWFXDmpCVIpWMggQ8Pe8_4pRkbm9aNafKnn0WRlb1zoy6JlOh2nN2Aw54jIAbFbsAUut3tuJr8w"; // get from https://dashboard.web3auth.io
 
@@ -148,6 +150,18 @@ function App() {
     const privateKey = await rpc.getPrivateKey();
     console.log(privateKey);
   };
+
+  const receiveFunds = async () => {
+    if (!web3auth) {
+      console.log("web3auth not initialized yet");
+      return;
+    }
+    const rpc = new RPC(provider);
+    const balance = await rpc.receiveFunds();
+    setBalance(balance);
+    console.log(balance);
+  };
+
   const loggedInView = (
     <>
       <button onClick={getUserInfo} className="card" style={styles.button}>
@@ -178,6 +192,9 @@ function App() {
       </button>
       <button onClick={logout} className="card" style={styles.button}>
         Logout
+      </button>
+      <button onClick={receiveFunds} className="card" style={styles.button}>
+        Receive Funds
       </button>
 
       <div id="console" style={{ whiteSpace: "pre-line" }}>
